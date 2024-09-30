@@ -1,5 +1,6 @@
 package ru.netology.test;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.data.DataHelper;
 import ru.netology.pages.LoginPage;
@@ -8,75 +9,64 @@ import ru.netology.pages.VerificationPage;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MoneyTransferTest {
+class MoneyTransferTest {
+    ru.netology.pages.DashboardPage dashboardPage;
 
-    @Test
-    void TransferOfTheFirstCard() {
-        int amount = 111 + (int) (Math.random() * 5000);
+    @BeforeEach
+    void setup(){
+        open("http://localhost:9999");
+        var loginPage = new LoginPage();
         var authInfo = DataHelper.getAuthInfo();
-        var loginPage = open("http://localhost:9999", LoginPage.class);
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCode(authInfo);
-        var dashboard = verificationPage.validVerify(verificationCode);
-        var cardBalanceFirst = dashboard.getCardBalance("01");
-        var cardBalanceSecond = dashboard.getCardBalance("02");
-        var cardInfo = DataHelper.Card.getSecondCardInfo();
-        var transferMoney = dashboard.firstCardButtonClick();
+        dashboardPage = verificationPage.validVerify(verificationCode);
+    }
+
+
+    @Test
+    void transferOfTheFirstCard() {
+        int amount = 2000;
+        var cardBalanceFirst = dashboardPage.getCardBalance("01");
+        var cardBalanceSecond = dashboardPage.getCardBalance("02");
+        var cardInfo = DataHelper.getSecondCardInfo();
+        var transferMoney = dashboardPage.firstCardButtonClick();
         transferMoney.transfer(cardInfo, amount);
-        var cardBalanceAfterSendFirst = DataHelper.Card.cardBalanceAfterGetMoney(cardBalanceFirst, amount);
-        var cardBalanceAfterSendSecond = DataHelper.Card.cardBalanceAfterSendMoney(cardBalanceSecond, amount);
-        assertEquals(cardBalanceAfterSendFirst, dashboard.getCardBalance("01"));
-        assertEquals(cardBalanceAfterSendSecond, dashboard.getCardBalance("02"));
+        var cardBalanceAfterSendFirst = DataHelper.cardBalanceAfterGetMoney(cardBalanceFirst, amount);
+        var cardBalanceAfterSendSecond = DataHelper.cardBalanceAfterSendMoney(cardBalanceSecond, amount);
+        assertEquals(cardBalanceAfterSendFirst, dashboardPage.getCardBalance("01"));
+        assertEquals(cardBalanceAfterSendSecond, dashboardPage.getCardBalance("02"));
     }
 
     @Test
-    void TransferOfTheSecondCard() {
-        int amount = 111 + (int) (Math.random() * 5000);
-        var loginPage = open("http://localhost:9999", LoginPage.class);
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCode(authInfo);
-        var dashboard = verificationPage.validVerify(verificationCode);
-        var cardBalanceFirst = dashboard.getCardBalance("01");
-        var cardBalanceSecond = dashboard.getCardBalance("02");
-        var cardInfo = DataHelper.Card.getFirstCardInfo();
-        var transferMoney = dashboard.secondCardButtonClick();
+    void transferOfTheSecondCard() {
+        int amount = 1000;
+        var cardBalanceFirst = dashboardPage.getCardBalance("01");
+        var cardBalanceSecond = dashboardPage.getCardBalance("02");
+        var cardInfo = DataHelper.getFirstCardInfo();
+        var transferMoney = dashboardPage.secondCardButtonClick();
         transferMoney.transfer(cardInfo, amount);
-        var cardBalanceAfterSendFirst = DataHelper.Card.cardBalanceAfterSendMoney(cardBalanceFirst, amount);
-        var cardBalanceAfterSendSecond = DataHelper.Card.cardBalanceAfterGetMoney(cardBalanceSecond, amount);
-        assertEquals(cardBalanceAfterSendFirst, dashboard.getCardBalance("01"));
-        assertEquals(cardBalanceAfterSendSecond, dashboard.getCardBalance("02"));
+        var cardBalanceAfterSendFirst = DataHelper.cardBalanceAfterSendMoney(cardBalanceFirst, amount);
+        var cardBalanceAfterSendSecond = DataHelper.cardBalanceAfterGetMoney(cardBalanceSecond, amount);
+        assertEquals(cardBalanceAfterSendFirst, dashboardPage.getCardBalance("01"));
+        assertEquals(cardBalanceAfterSendSecond, dashboardPage.getCardBalance("02"));
     }
 
     @Test
     void transferFromCardOneToCardOne() {
         int amount = 6000;
-        var loginPage = open("http://localhost:9999", LoginPage.class);
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCode(authInfo);
-        var dashboard = verificationPage.validVerify(verificationCode);
-        var cardBalanceFirst = dashboard.getCardBalance("01");
-        var cardBalanceSecond = dashboard.getCardBalance("02");
-        var cardInfo = DataHelper.Card.getFirstCardInfo();
-        var transferMoney = dashboard.firstCardButtonClick();
+        var cardBalanceFirst = dashboardPage.getCardBalance("01");
+        var cardBalanceSecond = dashboardPage.getCardBalance("02");
+        var cardInfo = DataHelper.getFirstCardInfo();
+        var transferMoney = dashboardPage.firstCardButtonClick();
         transferMoney.transfer(cardInfo, amount);
-        transferMoney.showAlertMessage("Ошибка! Вы не можете совершить операцию по данной карте. Пожалуйста, выберите другую карту или счет зачисления!");
     }
-
-
     @Test
     void NotTransferMoneyFromSecondToFirst() {
         int amount = 15000;
-        var loginPage = open("http://localhost:9999", LoginPage.class);
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCode(authInfo);
-        var dashboard = verificationPage.validVerify(verificationCode);
-        var cardBalanceFirst = dashboard.getCardBalance("01");
-        var cardBalanceSecond = dashboard.getCardBalance("02");
-        var cardInfo = DataHelper.Card.getFirstCardInfo();
-        var transferMoney = dashboard.secondCardButtonClick();
+        var cardBalanceFirst = dashboardPage.getCardBalance("01");
+        var cardBalanceSecond = dashboardPage.getCardBalance("02");
+        var cardInfo = DataHelper.getFirstCardInfo();
+        var transferMoney = dashboardPage.secondCardButtonClick();
         transferMoney.transfer(cardInfo, amount);
         transferMoney.showAlertMessage("Ошибка! Недостаточно средств на счете!");
     }

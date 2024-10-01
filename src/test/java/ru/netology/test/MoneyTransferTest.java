@@ -54,11 +54,25 @@ class MoneyTransferTest {
     @Test
     void transferFromCardOneToCardOne() {
         int amount = 6000;
-        var cardBalanceFirst = dashboardPage.getCardBalance("01");
+        var cardBalanceFirstBefore = dashboardPage.getCardBalance("01");
         var cardBalanceSecond = dashboardPage.getCardBalance("02");
         var cardInfo = DataHelper.getFirstCardInfo();
         var transferMoney = dashboardPage.firstCardButtonClick();
         transferMoney.transfer(cardInfo, amount);
+        var cardBalanceFirstAfter = dashboardPage.getCardBalance("01");
+        assertEquals(cardBalanceFirstBefore, cardBalanceFirstAfter);
+
+    }
+    @Test
+    void transferFromCardTwoToCardTwo() {
+        int amount = 6000;
+        var cardBalanceFirst = dashboardPage.getCardBalance("01");
+        var cardBalanceSecondBefore = dashboardPage.getCardBalance("02");
+        var cardInfo = DataHelper.getFirstCardInfo();
+        var transferMoney = dashboardPage.firstCardButtonClick();
+        transferMoney.transfer(cardInfo, amount);
+        var cardBalanceSecondAfter = dashboardPage.getCardBalance("02");
+        assertEquals(cardBalanceSecondBefore, cardBalanceSecondAfter);
     }
     @Test
     void NotTransferMoneyFromSecondToFirst() {
